@@ -22,13 +22,13 @@ export default async (req: NowRequest, res: NowResponse) => {
 
   const qs = querystring.stringify(query)
 
-  const body = await fetch(`https://ballchasing.com/api/replays?${qs}`, {
+  const body = await fetch(`https://ballchasing.com/api/replays/6c60499f-3462-46e9-91bd-6bfe618477f0`, {
     headers: {
       'Authorization': process.env.BALLCHASING_API,
     }
   })
   .then(r => r.json())
-  
+  // .then(({list}) => )
 
   res.json(body)
 }
