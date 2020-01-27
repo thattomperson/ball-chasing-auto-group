@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from '@now/node'
+import { NextApiRequest, NextApiResponse } from 'next'
 import fetch from 'node-fetch'
 import querystring from 'querystring'
 
@@ -7,7 +7,7 @@ const formatDate = (d: Date): string => `${d.getFullYear()}-${("00" + (d.getMont
 const after = (d: Date): string => `${formatDate(d)}T00:00:00+00:00`
 const before = (d: Date): string => `${formatDate(d)}T23:59:59+00:00`
 
-export default async (req: NowRequest, res: NowResponse) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   let d = new Date()
   if (typeof req.query.date === 'string') {
