@@ -91,7 +91,7 @@ resources:
     S3BucketReplays:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: "${self:service}-replays"
+        BucketName: "${self:service}-${opt:stage}-replays"
 
 plugins:
   - serverless-step-functions
