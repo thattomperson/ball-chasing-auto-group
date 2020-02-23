@@ -5,20 +5,33 @@
   "repository": "git@github.com:thattomperson/ball-chasing-auto-group.git",
   "author": "Thomas Albrighton <thomasalbrighton@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "next": "^9.2.1",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "styled-components": "^5.0.0"
-  },
   "scripts": {
-    "dev": "next",
-    "build": "next build && next export",
-    "start": "next start"
+    "deploy": "serverless deploy",
+    "predeploy": "npm run build",
+    "package": "serverless package",
+    "prepackage": "npm run build",
+    "build": "rollup -c",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "aws-sdk": "^2.610.0",
+    "node-fetch": "^2.6.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5"
   },
   "devDependencies": {
-    "@types/node": "^13.5.0",
-    "@types/react": "^16.9.19",
-    "typescript": "^3.7.5"
+    "@rollup/plugin-commonjs": "^11.0.1",
+    "@rollup/plugin-json": "^4.0.1",
+    "@rollup/plugin-node-resolve": "^7.0.0",
+    "builtin-modules": "^3.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "rollup": "^1.30.1",
+    "rollup-plugin-terser": "^5.2.0",
+    "serverless": "^1.62.0",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "serverless-step-functions": "^2.17.0",
+    "yaml-reader": "^1.0.3"
   }
 }

@@ -1,0 +1,98 @@
+org: thattomperson
+app: chasing-sessions
+# serverless.yml
+service: chasing-sessions
+
+package:
+  individually: true
+  excludeDevDependencies: false 
+  exclude:
+    - ".*/**"
+    - "**"
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: ${opt:region, 'ap-southeast-2'} # Overwrite the default region used. Default is us-east-1
+  memorySize: 512 # optional, in MB, default is 1024
+  timeout: 10 # optional, in seconds, default is 6
+  versionFunctions: false # optional, default is true
+  iamRoleStatements: # permissions for all of your functions can be set here
+    - Effect: Allow
+      Action: # Gives permission to DynamoDB tables in a specific region
+        - s3:ListBucket
+      Resource: arn:aws:s3:::${self:service}-replays
+    - Effect: Allow
+      Action: 
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource: arn:aws:s3:::${self:service}-replays/*
+
+functions:
+  checkForNewReplays:
+    handler: dist/checkForNewReplays.handler
+    environment:
+      BALLCHASING_API: UcWJsrUdhsPjL3Qn2atLyXepcyxJjTBincQcEnym
+    package:
+      include:
+        - dist/checkForNewReplays.js
+  downloadReplay:
+    handler: dist/downloadReplay.handler
+    timeout: 300 # optional, in seconds, default is 6
+    package:
+      include:
+        - dist/downloadReplay.js
+  parseReplay:
+    handler: dist/parseReplay.handler
+    package:
+      include:
+        - dist/parseReplay.js
+        - bin/rrrocket
+  transformJson:
+    handler: dist/transformJson.handler
+
+stepFunctions:
+  stateMachines:
+    replayParser:
+      definition:
+        Comment: "A Hello World example of the Amazon States Language using an AWS Lambda Function"
+        StartAt: CheckForNewReplays
+        States:
+          CheckForNewReplays:
+            Type: Task
+            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-checkForNewReplays"
+            Next: ProcessReplays
+          ProcessReplays:
+            Type: Map
+            Iterator:
+              StartAt: DownloadReplay
+              States:
+                DownloadReplay:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-downloadReplay
+                  InputPath: $
+                  ResultPath: $.raw
+                  Next: ParseReplay
+                ParseReplay:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-parseReplay
+                  InputPath: $
+                  ResultPath: $.parsed
+                  End: True
+            End: true
+      events:
+        - http:
+            path: hello
+            method: GET
+
+resources:
+  Resources:
+    S3BucketReplays:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${self:service}-replays"
+
+plugins:
+  - serverless-step-functions
+  - serverless-pseudo-parameters

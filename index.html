@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body style="height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+  
+
+<div style="outline: 1px red solid; width: 1020px; height: 1020px;" id="heatmap"></div>
+<script src="https://unpkg.com/heatmap.js@2.0.5/build/heatmap.js"></script>
+<script>
+
+const heatmapElm = document.getElementById('heatmap')
+
+const scale = (v) => parseInt((v/1600).toFixed())
+
+fetch('/out/alive.json')
+  .then(a => a.json())
+  .then(a => Object.values(a["31"].attributes.locations))
+  .then(a => {
+    a = a.map(({ x, y }) => ({ x: scale(x), y: scale(y), value: 10 }))
+    // let min = a.reduce((a, v) => v.x < a ? v.x < v.y ? v.x : v.y < a ? v.y : a : a,0)
+    // let max = a.reduce((a, v) => v.x > a ? v.x > v.y ? v.x : v.y > a ? v.y : a : a,0)
+
+
+    let ymin = a.reduce((a, { y }) => y < a ? y : a, 0)
+    let xmin = a.reduce((a, { x }) => x < a ? x : a, 0)
+
+    let ymax = a.reduce((a, { y }) => y > a ? y : a, 0)
+    let xmax = a.reduce((a, { x }) => x > a ? x : a, 0)
+
+    let yrange = ymax - ymin
+    let xrange = xmax - xmin
+
+    console.log(xrange, yrange)
+
+    a = a.map(({ x, y }) => ({ x: x - xmin, y: y - ymin }))
+    let m = {}
+    for (let x = 0; x <= xrange; x++) {
+      for (let y = 0; y <= yrange; y++) {
+        m[`${x},${y}`] = { x, y, value: 0}
+      }
+    }
+  
+    a.map(({ x, y }) => m[`${x},${y}`].value++)
+    m = Object.values(m).filter(({ value }) => value)
+    
+    data = {
+      max: m.reduce((a, v) => v.value > a ? v.value : a, 0),
+      min: 0,
+      data: m.map(v => ({
+        value: v.value,
+        x: v.x + 200,
+        y: v.y + 200
+      }))
+    }
+
+    const heatmap = h337.create({
+      container: heatmapElm,
+      radius: 10
+    })
+    
+    console.log(data)
+    heatmap.setData(data)
+  })
+  
+    
+    
+</script>
+</body>
+</html>
