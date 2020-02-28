@@ -29,7 +29,7 @@
     "eslint-plugin-import": "^2.20.1",
     "rollup": "^1.30.1",
     "rollup-plugin-terser": "^5.2.0",
-    "serverless": "^1.62.0",
+    "serverless": "1.64.0",
     "serverless-pseudo-parameters": "^2.5.0",
     "serverless-step-functions": "^2.17.0",
     "yaml-reader": "^1.0.3"
